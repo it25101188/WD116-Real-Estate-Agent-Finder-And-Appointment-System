@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Booking Confirmed – RealEstate Finder</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-brand">Real<span>Estate</span></div>
+    <nav class="sidebar-nav">
+        <a href="/user/dashboard" class="sidebar-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="/agents" class="sidebar-link"><i class="fas fa-users"></i> Find Agents</a>
+        <a href="/user/appointments" class="sidebar-link"><i class="fas fa-calendar-alt"></i> My Appointments</a>
+        <a href="/user/profile" class="sidebar-link"><i class="fas fa-user-cog"></i> Profile</a>
+        <a href="/logout" class="sidebar-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </nav>
+</div>
+
+<div class="dashboard-main">
+    <div class="dashboard-content d-flex align-items-center justify-content-center" style="min-height:90vh;">
+        <div class="text-center" style="max-width:480px;">
+            <div class="mb-4" style="animation: bounceIn .8s ease both;">
+                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                     style="width:100px;height:100px;background:#d1fae5;">
+                    <i class="fas fa-check-circle fa-4x" style="color:var(--success);"></i>
+                </div>
+            </div>
+            <h2 class="fw-bold mb-2">Appointment Booked!</h2>
+            <p class="text-muted mb-1">
+                Your appointment has been successfully submitted
+                <span th:if="${agentName}"> with <strong th:text="${agentName}">Agent</strong></span>.
+            </p>
+            <p class="text-muted mb-4">
+                The agent will review and confirm your appointment shortly.
+                <span th:if="${appointmentId}">Reference ID: <strong>#<span th:text="${appointmentId}">0</span></strong></span>
+            </p>
+
+            <div class="card mb-4 text-start">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3 text-muted">What happens next?</h6>
+                    <div class="d-flex gap-3 mb-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                             style="width:36px;height:36px;background:var(--primary-light);">
+                            <span class="fw-bold text-primary small">1</span>
+                        </div>
+                        <div>
+                            <div class="fw-600 small">Agent Reviews Your Request</div>
+                            <div class="text-muted small">The agent will review your appointment details.</div>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-3 mb-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                             style="width:36px;height:36px;background:#fef9c3;">
+                            <span class="fw-bold small" style="color:var(--accent);">2</span>
+                        </div>
+                        <div>
+                            <div class="fw-600 small">Confirmation</div>
+                            <div class="text-muted small">You will receive a confirmation once approved.</div>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                             style="width:36px;height:36px;background:#d1fae5;">
+                            <span class="fw-bold small" style="color:var(--success);">3</span>
+                        </div>
+                        <div>
+                            <div class="fw-600 small">Meet Your Agent</div>
+                            <div class="text-muted small">Attend your appointment and find your dream property!</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 justify-content-center">
+                <a href="/user/appointments" class="btn btn-primary px-4">
+                    <i class="fas fa-calendar-alt me-2"></i>View Appointments
+                </a>
+                <a href="/agents" class="btn btn-outline-secondary px-4">
+                    <i class="fas fa-search me-2"></i>Find More Agents
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
