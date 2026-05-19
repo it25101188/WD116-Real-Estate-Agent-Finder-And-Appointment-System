@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Find Agents – RealEstate Finder</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand" href="/">Real<span>Estate</span></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+        <li class="nav-item"><a class="nav-link active" href="/agents">Find Agents</a></li>
+      </ul>
+      <ul class="navbar-nav">
+        <li sec:authorize="isAuthenticated()" class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+            <i class="fas fa-user-circle me-1"></i><span sec:authentication="name">User</span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li sec:authorize="hasRole('USER')"><a class="dropdown-item" href="/user/dashboard"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+            <li sec:authorize="hasRole('AGENT')"><a class="dropdown-item" href="/agent/dashboard"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+            <li sec:authorize="hasRole('ADMIN')"><a class="dropdown-item" href="/admin/dashboard"><i class="fas fa-tachometer-alt me-2"></i>Admin Panel</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="/logout"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+          </ul>
+        </li>
+        <li sec:authorize="!isAuthenticated()" class="nav-item"><a class="nav-link" href="/login">Login</a></li>
+        <li sec:authorize="!isAuthenticated()" class="nav-item ms-2"><a class="btn btn-nav-primary" href="/register">Register</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="container">
+    <h1><i class="fas fa-users me-2"></i>Find Real Estate Agents</h1>
+    <p>Browse and connect with our verified professional agents</p>
+  </div>
+</div>
+
+<div class="container mb-5">
+  <!-- SEARCH BAR -->
+  <div class="card mb-4">
+    <div class="card-body p-3">
+      <form th:action="@{/agents}" method="get" class="d-flex gap-2">
+        <div class="input-group">
+          <span class="input-group-text"><i class="fas fa-search"></i></span>
+          <input type="text" name="search" class="form-control form-control-lg"
+                 placeholder="Search by name, specialization, city..."
+                 th:value="${searchKeyword}"/>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg px-4">Search</button>
+        <a href="/agents" class="btn btn-outline-secondary btn-lg">Clear</a>
+      </form>
+    </div>
+  </div>
+
+  <!-- RESULTS COUNT -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <p class="text-muted mb-0">
+      Showing <strong th:text="${agents.size()}">0</strong> agent(s)
+      <span th:if="${searchKeyword}"> for "<strong th:text="${searchKeyword}"></strong>"</span>
+    </p>
+  </div>
+
+  <!-- NO RESULTS -->
+  <div th:if="${agents.empty}" class="text-center py-5">
+    <i class="fas fa-search fa-4x text-muted mb-3"></i>
+    <h4 class="text-muted">No agents found</h4>
+    <p class="text-muted">Try a different search term or <a href="/agents">view all agents</a></p>
+  </div>
+
+  <!-- AGENT GRID -->
+  <div class="row g-4">
+    <div class="col-md-6 col-lg-4" th:each="agent : ${agents}">
+      <div class="card agent-card h-100">
+        <!-- Card Top Banner -->
+        <div class="d-flex align-items-center justify-content-center"
+             style="background: linear-gradient(135deg,#1a56db,#0f172a); height:100px; border-radius:12px 12px 0 0;">
+          <i class="fas fa-building fa-3x text-white" style="opacity:.2;"></i>
+        </div>
+        <div class="card-body text-center pt-0 pb-4">
+          <div class="agent-avatar mx-auto" th:text="${agent.firstName.charAt(0)}">A</div>
+          <h5 class="mt-3 mb-0 fw-bold" th:text="${agent.fullName}">Agent Name</h5>
+          <p class="text-muted small mb-2" th:text="${agent.specialization}">Specialization</p>
+
+          <div class="stars mb-1">
+            <!-- Dynamic Stars based on rating -->
+            <i class="fas fa-star" th:each="i : ${#numbers.sequence(1, 5)}"
+               th:classappend="${agent.rating >= i} ? 'text-warning' : ((${agent.rating >= (i - 0.5)}) ? 'fas fa-star-half-alt text-warning' : 'far fa-star text-muted')"></i>
+          </div>
+          <small class="text-muted d-block mb-3">
+            <span th:text="${#numbers.formatDecimal(agent.rating, 1, 1)}">4.8</span>
+            (<span th:text="${agent.totalReviews}">100</span> reviews)
+          </small>
+
+          <div class="d-flex flex-wrap gap-2 justify-content-center mb-3">
+            <span class="badge-pill badge-available" th:if="${agent.available}">
+              <i class="fas fa-circle me-1" style="font-size:.6rem;"></i>Available
+            </span>
+            <span class="badge-pill badge-unavailable" th:unless="${agent.available}">
+              <i class="fas fa-circle me-1" style="font-size:.6rem;"></i>Unavailable
+            </span>
+            <span class="badge bg-light text-dark small" th:if="${agent.yearsExperience != null}"
+                  th:text="${agent.yearsExperience} + ' yrs exp'">10 yrs</span>
+          </div>
+
+          <!-- Info -->
+          <div class="text-start border rounded p-2 mb-3 small bg-light">
+            <div class="mb-1" th:if="${agent.officeAddress}">
+              <i class="fas fa-map-marker-alt me-2 text-primary"></i>
+              <span th:text="${agent.officeAddress}">Location</span>
+            </div>
+            <div th:if="${agent.licenseNumber}">
+              <i class="fas fa-id-card me-2 text-primary"></i>
+              License: <span th:text="${agent.licenseNumber}">REA-001</span>
+            </div>
+          </div>
+
+          <p class="text-muted small mb-3" th:if="${agent.bio}"
+             th:text="${#strings.abbreviate(agent.bio, 90)}">Bio...</p>
+
+          <!-- Actions -->
+          <div class="d-grid gap-2">
+            <a th:href="@{/user/book/{id}(id=${agent.id})}"
+               sec:authorize="hasRole('USER')"
+               class="btn btn-primary btn-sm">
+              <i class="fas fa-calendar-plus me-1"></i>Book Appointment
+            </a>
+            <a href="/login" sec:authorize="!isAuthenticated()" class="btn btn-outline-primary btn-sm">
+              <i class="fas fa-sign-in-alt me-1"></i>Login to Book
+            </a>
+            <a href="/user/dashboard" sec:authorize="hasAnyRole('AGENT','ADMIN')"
+               class="btn btn-outline-secondary btn-sm">View Profile</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div class="footer-brand">Real<span>Estate</span></div>
+      <p class="mb-0 small">&copy; 2024 RealEstate Finder. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

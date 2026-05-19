@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manage Agents – Admin</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-brand">Real<span>Estate</span></div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-section">Admin Panel</div>
+    <a href="/admin/dashboard" class="sidebar-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+    <div class="sidebar-section mt-2">Management</div>
+    <a href="/admin/users" class="sidebar-link"><i class="fas fa-users"></i> Users</a>
+    <a href="/admin/agents" class="sidebar-link active"><i class="fas fa-user-tie"></i> Agents</a>
+    <a href="/admin/appointments" class="sidebar-link"><i class="fas fa-calendar-alt"></i> Appointments</a>
+    <a href="/admin/reviews" class="sidebar-link"><i class="fas fa-star"></i> Reviews</a>
+    <div class="sidebar-section mt-2">System</div>
+    <a href="/" class="sidebar-link"><i class="fas fa-home"></i> Public Site</a>
+    <a href="/logout" class="sidebar-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </nav>
+</div>
+
+<div class="dashboard-main">
+  <div class="dashboard-topbar">
+    <div class="d-flex align-items-center gap-3">
+      <button class="btn btn-sm btn-outline-secondary d-lg-none" onclick="document.getElementById('sidebar').classList.toggle('show')"><i class="fas fa-bars"></i></button>
+      <h5 class="mb-0 fw-bold">Manage Agents</h5>
+    </div>
+    <a href="/admin/agents/new" class="btn btn-primary btn-sm"><i class="fas fa-plus me-1"></i>Add Agent</a>
+  </div>
+
+  <div class="dashboard-content">
+    <div th:if="${successMsg}" class="alert alert-success alert-dismissible fade show mb-4">
+      <i class="fas fa-check-circle me-2"></i><span th:text="${successMsg}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Search -->
+    <div class="card mb-4">
+      <div class="card-body p-3">
+        <form th:action="@{/admin/agents}" method="get" class="d-flex gap-2">
+          <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-search"></i></span>
+            <input type="text" name="search" class="form-control" placeholder="Search agents..." th:value="${searchKeyword}"/>
+          </div>
+          <button type="submit" class="btn btn-primary">Search</button>
+          <a href="/admin/agents" class="btn btn-outline-secondary">Clear</a>
+        </form>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-header">
+        <h5><i class="fas fa-user-tie me-2 text-primary"></i>All Agents</h5>
+        <span class="badge bg-primary" th:text="${agents.size()} + ' agents'">0</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr><th>#</th><th>Agent</th><th>Email</th><th>Specialization</th><th>License</th><th>Exp</th><th>Rating</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <tr th:each="ag, i : ${agents}">
+              <td th:text="${i.count}">1</td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#0d9488,#0f766e);display:flex;align-items:center;justify-content:center;color:white;font-size:.8rem;font-weight:700;"
+                       th:text="${ag.firstName.charAt(0)}">A</div>
+                  <div>
+                    <div class="fw-600" th:text="${ag.fullName}">Name</div>
+                    <small class="text-muted" th:if="${ag.officeAddress}" th:text="${ag.officeAddress}">Location</small>
+                  </div>
+                </div>
+              </td>
+              <td th:text="${ag.email}">email</td>
+              <td th:text="${ag.specialization}">Spec</td>
+              <td th:text="${ag.licenseNumber != null ? ag.licenseNumber : '—'}">—</td>
+              <td th:text="${ag.yearsExperience != null ? ag.yearsExperience + ' yrs' : '—'}">—</td>
+              <td>
+                <div class="text-warning small mb-0">
+                  <i class="fas fa-star" th:each="i : ${#numbers.sequence(1, 5)}"
+                     th:classappend="${ag.rating >= i} ? '' : 'text-muted opacity-25'"></i>
+                </div>
+                <div class="small fw-600" th:text="${#numbers.formatDecimal(ag.rating, 1, 1)} + ' (' + ${ag.totalReviews} + ')'">4.8 (10)</div>
+              </td>
+              <td>
+                <span th:if="${ag.available}" class="badge-pill badge-available">Available</span>
+                <span th:unless="${ag.available}" class="badge-pill badge-unavailable">Unavailable</span>
+              </td>
+              <td>
+                <div class="d-flex gap-1">
+                  <a th:href="@{/admin/agents/edit/{id}(id=${ag.id})}" class="btn btn-sm btn-outline-primary btn-icon" title="Edit"><i class="fas fa-edit"></i></a>
+                  <form th:action="@{/admin/agents/delete/{id}(id=${ag.id})}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <button type="submit" class="btn btn-sm btn-outline-danger btn-icon" title="Delete"
+                            onclick="return confirm('Delete this agent and all their appointments?')">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
